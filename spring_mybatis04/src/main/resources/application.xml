@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/mybatis?userSSL=true&amp;useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+    </bean>
+
+<!--    这段代码相当于配置好sqlsessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!--绑定mybatis配置文件-->
+        <property name="configuration" value="classpath:mybatis-config.xml"/>
+        <property name="mapperLocations" value="classpath:com/caomei/mapper/*.xml"/>
+    </bean>
+
+<!--    如何生成sqlsession呢，我们需要在spring中进行配置。   -->
+    <!--就是我们使用的sqlsession-->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <!--只能使用构造器注入，因为没有set方法-->
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+
+<!--在之前的mybatis中，我们的sqlsession是通过在实现类生成sqlsession来执行的，那么在spring中，我们是通过注入进行的。
+
+在具体的实现类中，我们生成set方法，以便spring进行注入。-->
+    <bean id="userMapper" class="com.caomei.mapper.UserMapperImpl">
+        <property name="sqlSession" ref="sqlSession"/>
+
+    </bean>
+
+</beans>

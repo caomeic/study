@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.caomei.dao.studentsMapper">
+    <!-- 按查询嵌套处理 -->
+    <select resultMap="StudentsInfoMapBySelect" id="getStudentsInfo">
+        select * from students
+    </select>
+
+    <resultMap id="StudentsInfoMapBySelect" type="students">
+        <id property="sid" column="id"/>
+        <result property="sname" column="name"/>
+
+        <!-- 复杂类型： Teachers类
+                【association】: 对象
+                    - 【property】: 设置获取到的结果集字段 => private Teachers teacher
+                    - 【column】: 设置映射对应的数据库字段 => tid
+                    - 【javaType】: 设置返回类型 => Teachers
+                    - 【select】: 子查询绑定。通过其他<select>标签中的值，指向其他select语句 => <select id="TeachersInfo">
+                【collection】: 集合
+            -->
+        <association property="teacher" column="tid" javaType="Teachers" select="TeachersInfo"/>
+    </resultMap>
+
+    <!-- 查询指定教师信息 -->
+    <select id="TeachersInfo" resultType="teachers">
+        select * from teachers where tid = #{tid}
+    </select>
+
+
+</mapper>

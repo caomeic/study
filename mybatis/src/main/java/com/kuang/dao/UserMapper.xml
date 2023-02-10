@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuang.dao.UsersDao">
+
+    <select id="getUsersInfo" resultType="com.kuang.pojo.Users">
+        select * from user;
+    </select>
+
+    <select id="getIdUser" parameterType="int" resultType="com.kuang.pojo.Users">
+        select * from user where id = #{id};
+    </select>
+
+    <insert id="insertUser" parameterType="com.kuang.pojo.Users">
+        insert into user
+        values (#{id} , #{name} , #{pwd});
+    </insert>
+
+    <insert id="insertManyUsers" >
+        insert into user values
+        <foreach  item="User" collection="list" separator=",">
+            (#{User.id},#{User.name},#{User.pwd})
+        </foreach>
+    </insert>
+
+    <!-- select sql: 绑定getUsersInfoByPhantomSelect,模糊查询  like === 模糊查询 -->
+    <select id="getUsersInfoByPhantomSelect" resultType="Users">
+        select * from user
+        where name like #{name}
+    </select>
+
+    <!--结果映射   解决【数据库字段】与【类属性字段】不相同  -->
+    <!-- 查询指定用户信息 -->
+    <resultMap id="resultMapUser" type="users">
+        <!-- 类属性【userId】映射为数据库中的【id】字段 -->
+        <id property="Id" column="id"/>
+        <!-- 类属性【userName】映射为数据库中的【name】字段 -->
+        <result property="Name" column="name" />
+        <!-- 类属性【userPasswd】映射为数据库中的【password】字段 -->
+        <result property="Passwd" column="pwd" />
+    </resultMap>
+
+    <!-- 【resultMap】属性指向<resultMap>标签 -->
+    <select id="getUserInfoByUserId" resultType="users" parameterType="_int" resultMap="resultMapUser">
+        select * from user
+        where id = #{id}
+    </select>
+
+    <!--分页的实现   1. 使用sql语句 ==》》 limit  2.RowBounds【不推荐】   3.PageHelp  就尽量使用limit-->
+    <resultMap id="getUsersInfoByLimit" type="MyBatisAliasUsers">
+        <id property="Id" column="id" />
+        <result property="Name" column="name" />
+        <result property="Passwd" column="pwd" />
+
+    </resultMap>
+    <!-- 使用map传入limit所需要的起始位置以及返回值 -->
+    <select id="getUsersInfoByLimit" resultMap="getUsersInfoByLimit" parameterType="map">
+        select * from user limit #{startIndex},#{returnSize}
+    </select>
+
+</mapper>
